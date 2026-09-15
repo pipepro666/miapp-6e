@@ -24,7 +24,7 @@ export default function Formulario() {
     }
 
     router.push({
-      pathname: "/resultado",
+      pathname: "/resultado" as any,
       params: {
         nombre,
         correo,
@@ -36,6 +36,8 @@ export default function Formulario() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      
+      {/* SECCIÓN DEL FORMULARIO */}
       <Text style={styles.titulo}>Registro de usuario</Text>
       <Text style={styles.subtitulo}>
         Completa la información para continuar.
@@ -53,7 +55,7 @@ export default function Formulario() {
         <Text style={styles.label}>Correo</Text>
         <TextInput
           style={styles.input}
-          placeholder="correo@dominio.com"
+          placeholder="tucorreo@gmail.com"
           keyboardType="email-address"
           autoCapitalize="none"
           value={correo}
@@ -63,7 +65,7 @@ export default function Formulario() {
         <Text style={styles.label}>Teléfono</Text>
         <TextInput
           style={styles.input}
-          placeholder="3001234567"
+          placeholder="3115784556"
           keyboardType="numeric"
           value={telefono}
           onChangeText={setTelefono}
@@ -81,6 +83,33 @@ export default function Formulario() {
           <Text style={styles.botonTexto}>Enviar información</Text>
         </Pressable>
       </View>
+
+      {/* SECCIÓN DE LOS 3 BOTONES EXTRA */}
+      <View style={styles.contenedorBotonesExtra}>
+        <Text style={styles.subtituloBotones}>Otras opciones de la tienda</Text>
+        
+        <Pressable 
+          style={styles.botonSecundario} 
+          onPress={() => router.push("/imagenes" as any)}
+        >
+          <Text style={styles.botonTextoSecundario}>📸 Ver Galería de Ropa</Text>
+        </Pressable>
+
+        <Pressable 
+          style={styles.botonSecundario} 
+          onPress={() => router.push("/contacto" as any)}
+        >
+          <Text style={styles.botonTextoSecundario}>📍 Ir a Contacto</Text>
+        </Pressable>
+
+        <Pressable 
+          style={styles.botonSecundario} 
+          onPress={() => router.push("/" as any)}
+        >
+          <Text style={styles.botonTextoSecundario}>🏠 Volver al Menú Principal</Text>
+        </Pressable>
+      </View>
+
     </ScrollView>
   );
 }
@@ -96,12 +125,12 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#6C4051",
+    color: "#271366",
     textAlign: "center",
   },
 
   subtitulo: {
-    color: "#8A727C",
+    color: "#2b358b",
     textAlign: "center",
     marginBottom: 20,
   },
@@ -116,7 +145,7 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    color: "#684552",
+    color: "#1c165f",
     fontWeight: "600",
     marginBottom: 6,
   },
@@ -124,14 +153,14 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: "#FFF9FB",
     borderWidth: 1,
-    borderColor: "#EBC8D6",
+    borderColor: "#2b2884",
     borderRadius: 13,
     padding: 12,
     marginBottom: 14,
   },
 
   boton: {
-    backgroundColor: "#C96A8B",
+    backgroundColor: "#260e93",
     paddingVertical: 14,
     borderRadius: 13,
     alignItems: "center",
@@ -141,5 +170,35 @@ const styles = StyleSheet.create({
   botonTexto: {
     color: "white",
     fontWeight: "bold",
+  },
+
+  // ESTILOS NUEVOS PARA LOS 3 BOTONES
+  contenedorBotonesExtra: {
+    marginTop: 30,
+    width: "100%",
+    gap: 12, // Separa los botones de forma pareja
+  },
+
+  subtituloBotones: {
+    color: "#241a7d",
+    textAlign: "center",
+    marginBottom: 5,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  botonSecundario: {
+    backgroundColor: "#FFFFFF",
+    paddingVertical: 14,
+    borderRadius: 13,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#3a0e7b", // Borde del mismo color que el botón principal
+  },
+
+  botonTextoSecundario: {
+    color: "#3b129a", // Texto del mismo color que el botón principal
+    fontWeight: "bold",
+    fontSize: 15,
   },
 });
