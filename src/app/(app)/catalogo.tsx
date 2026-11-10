@@ -5,12 +5,12 @@ import {
   Text,
   View,
   ActivityIndicator,
-  RefreshControl // Mejora: Permite deslizar la pantalla hacia abajo para recargar
+  ScrollView // Agregamos ScrollView para deslizar las categorías
 } from "react-native";
 import { supabase } from "../../lib/supabase";
 import { useState, useEffect } from "react";
 
-// Estructura de los productos
+// 1. Estructura de los productos
 type Item = {
   id: number; 
   codigo: string;
@@ -20,112 +20,129 @@ type Item = {
   precio: number | null;
 }
 
+// Lista fija de categorías para la tienda
+const CATEGORIAS = ["Todos", "Camiseta", "Chaqueta", "Jeans", "Tenis", "Vestido"];
+
 export default function Catalogo() {
   const router = useRouter();
   
-  // Estados de la aplicación
+  // 2. Estados de la aplicación
   const [items, setItems] = useState<Item[]>([]);
   const [cargando, setCargando] = useState(true);
-  const [refrescando, setRefrescando] = useState(false); // Estado para el gesto de deslizar
   const [errorTexto, setErrorTexto] = useState("");
+  
+  // Nuevo estado para saber qué categoría está seleccionada
+  const [categoriaActiva, setCategoriaActiva] = useState("Todos");
 
-  // 1. FUNCIÓN PRINCIPAL: Consultar productos en Supabase
-  // (La sacamos del useEffect para poder usarla con el botón también)
-  async function cargarDatos() {
-    try {
-      setErrorTexto("");
-      
-      const { data, error } = await supabase
-        .from("catalogo")
-        .select("id, codigo, titulo, descripcion, detalle, precio")
-        .order("codigo", { ascending: true });
-
-      if (error) {
-        console.error("Error Supabase: ", error);
-        throw error;
-      }
-      
-      setItems(data || []);
-    } catch (error: unknown) {
-      console.error("Error al cargar catalogo: ", error);
-      
-      // Mensaje de error formateado
-      const mensaje = error instanceof Error ? error.message : String(error);
-      setErrorTexto("No fue posible cargar: " + mensaje);
-      setItems([]);
-    } finally {
-      setCargando(false);
-      setRefrescando(false);
-    }
-  }
-
-  // 2. EJECUTAR AL ABRIR LA PANTALLA
+  // 3. Consultar productos de Supabase
   useEffect(() => {
+    async function cargarDatos() {
+      try {
+        setCargando(true);
+        setErrorTexto("");
+        
+        const { data, error } = await supabase
+          .from("catalogo")
+          .select("id, codigo, titulo, descripcion, detalle, precio")
+          .order("codigo", { ascending: true });
+
+        if (error) {
+          console.error("Error Supabase: ", error);
+          throw error;
+        }
+        
+        console.log("Productos obtenidos:", data);
+        setItems(data || []);
+      } catch (error: unknown) {
+        console.error("Error al cargar catalogo: ", error);
+        
+        const mensaje =
+          error instanceof Error
+            ? error.message
+            : typeof error === "object" && error !== null && "message" in error
+            ? String(error.message)
+            : String(error);
+
+        setErrorTexto("No fue posible cargar: " + mensaje);
+        setItems([]);
+      } finally {
+        setCargando(false);
+      }
+    }
+
     cargarDatos();
   }, []);
 
-  // Función para el botón manual
-  const recargarManual = () => {
-    setCargando(true);
-    cargarDatos();
-  };
+  // 4. Lógica para filtrar los productos según la categoría tocada
+  const productosFiltrados = categoriaActiva === "Todos" 
+    ? items 
+    : items.filter(item => item.titulo.toLowerCase().includes(categoriaActiva.toLowerCase()));
 
-  // Función para el gesto de deslizar
-  const alDeslizar = () => {
-    setRefrescando(true);
-    cargarDatos();
-  };
-
-  // 3. MUESTRA EL INDICADOR DE CARGA (Pantalla completa)
+  // 5. Interfaz mientras carga
   if (cargando) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#F8FAFC" }}>
-        <ActivityIndicator size="large" color="#1E3A8A" />
-        <Text style={{ marginTop: 10, color: "#64748B" }}>Cargando catálogo...</Text>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text style={{ marginTop: 10 }}>Cargando catálogo...</Text>
       </View>
     );
   }
 
-  // 4. EXPLORA EL CATÁLOGO (Interfaz principal)
+  // 6. Interfaz principal con la lista
   return (
-    <View style={{ flex: 1, padding: 20, backgroundColor: "#F8FAFC" }}>
+    <View style={{ flex: 1, padding: 20, backgroundColor: "#F5F7F8" }}>
       
-      {/* Mensaje de error visual */}
+      {/* SECCIÓN DE CATEGORÍAS (Desplazable de forma horizontal) */}
+      <View style={{ marginBottom: 15 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {CATEGORIAS.map((cat, index) => (
+            <Pressable
+              key={index}
+              onPress={() => setCategoriaActiva(cat)}
+              style={{
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                marginRight: 10,
+                borderRadius: 20,
+                // Cambia de color si está seleccionada
+                backgroundColor: categoriaActiva === cat ? "#0F776C" : "#E2E8F0"
+              }}
+            >
+              <Text style={{ 
+                fontWeight: "bold", 
+                // Cambia el color del texto si está seleccionada
+                color: categoriaActiva === cat ? "#FFF" : "#334155" 
+              }}>
+                {cat}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* Si el bloque catch captura un error, lo mostramos aquí en color rojo */}
       {errorTexto ? (
-        <Text style={{ color: "#EF4444", fontSize: 15, marginBottom: 15, textAlign: "center", fontWeight: "bold" }}>
+        <Text style={{ color: "red", fontSize: 16, marginBottom: 15, textAlign: "center" }}>
           {errorTexto}
         </Text>
       ) : null}
 
-      {/* Botón Cargar Catálogo (Agregado) */}
-      <Pressable 
-        style={{ backgroundColor: "#0F172A", padding: 12, borderRadius: 8, marginBottom: 15, alignItems: "center" }}
-        onPress={recargarManual}
-      >
-        <Text style={{ color: "#FFF", fontWeight: "bold", fontSize: 16 }}>↻ Recargar Catálogo</Text>
-      </Pressable>
-
-      {/* Mostrar el catálogo en lista */}
+      {/* Lista de productos (ahora usa productosFiltrados en lugar de items) */}
       <FlatList
-        data={items}
+        data={productosFiltrados}
         keyExtractor={(item) => item.id.toString()}
-        // Control para deslizar y actualizar
-        refreshControl={
-          <RefreshControl refreshing={refrescando} onRefresh={alDeslizar} colors={["#1E3A8A"]} />
-        }
-        // Mensaje si la base de datos está vacía
         ListEmptyComponent={
-          <Text style={{ textAlign: "center", marginTop: 40, color: "#94A3B8", fontSize: 16 }}>
-            No hay productos disponibles.
+          <Text style={{ textAlign: "center", marginTop: 20, color: "#666" }}>
+            No hay productos en esta categoría.
           </Text>
         }
         renderItem={({ item }) => (
           <Pressable 
-            style={{ padding: 15, borderWidth: 1, borderColor: "#E2E8F0", marginBottom: 10, backgroundColor: "#FFF", borderRadius: 10 }}
+            style={{ padding: 15, borderBottomWidth: 1, borderColor: "#ccc", marginBottom: 10, backgroundColor: "#fff", borderRadius: 8 }}
             onPress={() => router.push(`/detalle?id=${item.id}`)}
           >
-            <Text style={{ fontSize: 18, fontWeight: "bold", color: "#1E3A8A" }}>{item.titulo}</Text>
-            <Text style={{ color: "#10B981", marginTop: 5, fontWeight: "600" }}>${item.precio}</Text>
+            <Text style={{ fontSize: 18, fontWeight: "bold" }}>{item.titulo}</Text>
+            <Text style={{ color: "green", marginTop: 5 }}>${item.precio}</Text>
           </Pressable>
         )}
       />
