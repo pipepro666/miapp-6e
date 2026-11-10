@@ -7,6 +7,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { supabase } from "../../lib/supabase";
 
 function OpcionMenu({
   icono,
@@ -38,9 +39,15 @@ function OpcionMenu({
 export default function Inicio() {
   const router = useRouter();
 
+  const cerrarSesion = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      alert(error.message);
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      
       {/* PORTADA PRINCIPAL */}
       <View style={styles.hero}>
         <Image
@@ -63,9 +70,7 @@ export default function Inicio() {
       <View style={styles.saludoBox}>
         <View>
           <Text style={styles.saludoTitulo}>Hola, amante de la moda</Text>
-          <Text style={styles.saludoTexto}>
-            ¿Qué estilo buscas hoy?
-          </Text>
+          <Text style={styles.saludoTexto}>¿Qué estilo buscas hoy?</Text>
         </View>
 
         <View style={styles.avatar}>
@@ -102,18 +107,25 @@ export default function Inicio() {
         icono="🛒"
         titulo="Hacer Pedido"
         descripcion="Registra tus datos y compra tu prenda favorita."
-        onPress={() => router.push("/formulario" as any)}
+        onPress={() => router.push("/formulario")}
+      />
+
+      {/* OPCIÓN VER CLIENTES - NUEVA OPCIÓN */}
+      <OpcionMenu
+        icono="👥"
+        titulo="Ver clientes registrados"
+        descripcion="Consulta el listado de clientes en la base de datos."
+        onPress={() => router.push("/resultado")}
       />
 
       <Text style={styles.subtituloSeccion}>Más opciones</Text>
 
       {/* CUADRÍCULA DE BOTONES */}
       <View style={styles.contenedorGrid}>
-        
         {/* GALERÍA - BOTÓN GRANDE */}
         <Pressable
           style={styles.botonGridGrande}
-          onPress={() => router.push("/imagenes" as any)}
+          onPress={() => router.push("/imagenes")}
         >
           <Text style={styles.emojiGrid}>📸</Text>
           <Text style={styles.textoGrid}>Galería de Ropa</Text>
@@ -122,7 +134,7 @@ export default function Inicio() {
         {/* CONTACTO */}
         <Pressable
           style={styles.botonGrid}
-          onPress={() => router.push("/contacto" as any)}
+          onPress={() => router.push("/contacto")}
         >
           <Text style={styles.emojiGrid}>📍</Text>
           <Text style={styles.textoGrid}>Contacto y Sucursales</Text>
@@ -131,19 +143,29 @@ export default function Inicio() {
         {/* VER PRENDA */}
         <Pressable
           style={styles.botonGrid}
-          onPress={() => router.push("/producto" as any)}
+          onPress={() => router.push("/producto")}
         >
           <Text style={styles.emojiGrid}>✨</Text>
           <Text style={styles.textoGrid}>Ver Prenda del Día</Text>
         </Pressable>
-
+        
+        {/* VER COLECCIONES */}
+        <Pressable
+          style={styles.botonGrid}
+          onPress={() => router.push("/coleccion")}
+        >
+          <Text style={styles.emojiGrid}>🛍️</Text>
+          <Text style={styles.textoGrid}>Ver Colecciones</Text>
+        </Pressable>
       </View>
 
-      {/* FOOTER */}
-      <Text style={styles.footer}>
-        Boutique Urbana · Desarrollo Móvil
-      </Text>
+      {/* BOTÓN CERRAR SESIÓN */}
+      <Pressable style={styles.botonCerrar} onPress={cerrarSesion}>
+        <Text style={styles.textoCerrar}>Cerrar sesión</Text>
+      </Pressable>
 
+      {/* FOOTER */}
+      <Text style={styles.footer}>Boutique Urbana · Desarrollo Móvil</Text>
     </ScrollView>
   );
 }
@@ -154,7 +176,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     padding: 18,
   },
-
   hero: {
     height: 280,
     borderRadius: 28,
@@ -162,12 +183,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     elevation: 6,
   },
-
   imagenHero: {
     width: "100%",
     height: "100%",
   },
-
   overlay: {
     position: "absolute",
     left: 0,
@@ -176,7 +195,6 @@ const styles = StyleSheet.create({
     padding: 22,
     backgroundColor: "rgba(0, 0, 0, 0.6)",
   },
-
   etiqueta: {
     color: "#E0E0E0",
     fontSize: 11,
@@ -184,20 +202,17 @@ const styles = StyleSheet.create({
     letterSpacing: 1.8,
     marginBottom: 6,
   },
-
   titulo: {
     color: "#FFFFFF",
     fontSize: 32,
     fontWeight: "bold",
     marginBottom: 6,
   },
-
   subtitulo: {
     color: "#F5F5F5",
     fontSize: 14,
     lineHeight: 21,
   },
-
   saludoBox: {
     backgroundColor: "#F9F9F9",
     borderRadius: 20,
@@ -210,19 +225,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#EEEEEE",
   },
-
   saludoTitulo: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#111111",
   },
-
   saludoTexto: {
     marginTop: 3,
     color: "#666666",
     fontSize: 14,
   },
-
   avatar: {
     width: 50,
     height: 50,
@@ -231,11 +243,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
   avatarTexto: {
     fontSize: 24,
   },
-
   resumen: {
     backgroundColor: "#F9F9F9",
     borderRadius: 20,
@@ -248,146 +258,122 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#EEEEEE",
   },
-
   resumenItem: {
-    flex: 1,
     alignItems: "center",
   },
-
   resumenNumero: {
-    color: "#111111",
     fontSize: 18,
     fontWeight: "bold",
+    color: "#111111",
   },
-
   resumenTexto: {
-    color: "#666666",
     fontSize: 12,
-    marginTop: 3,
+    color: "#666666",
+    marginTop: 2,
   },
-
   separador: {
     width: 1,
-    height: 35,
+    height: 24,
     backgroundColor: "#DDDDDD",
   },
-
   seccionTitulo: {
-    fontSize: 21,
+    fontSize: 20,
     fontWeight: "bold",
     color: "#111111",
-    marginBottom: 14,
+    marginBottom: 12,
   },
-
-  card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 16,
-    marginBottom: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#E5E5E5",
-    elevation: 2,
-  },
-
-  iconoCaja: {
-    width: 56,
-    height: 56,
-    borderRadius: 18,
-    backgroundColor: "#F2F2F2",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 14,
-  },
-
-  icono: {
-    fontSize: 25,
-  },
-
-  cardInfo: {
-    flex: 1,
-  },
-
-  cardTitulo: {
-    fontSize: 17,
-    fontWeight: "bold",
-    color: "#111111",
-    marginBottom: 4,
-  },
-
-  cardDescripcion: {
-    color: "#666666",
-    fontSize: 13,
-    lineHeight: 18,
-  },
-
-  flecha: {
-    fontSize: 30,
-    color: "#999999",
-    marginLeft: 8,
-  },
-
   subtituloSeccion: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#333333",
+    marginTop: 20,
     marginBottom: 12,
   },
-
-  /* CONTENEDOR GRID */
-  contenedorGrid: {
+  card: {
+    backgroundColor: "#F9F9F9",
+    borderRadius: 18,
+    padding: 16,
     flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#EEEEEE",
+  },
+  iconoCaja: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: "#EAEAEA",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 14,
+  },
+  icono: {
+    fontSize: 22,
+  },
+  cardInfo: {
+    flex: 1,
+  },
+  cardTitulo: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#111111",
+  },
+  cardDescripcion: {
+    fontSize: 13,
+    color: "#666666",
+    marginTop: 2,
+  },
+  flecha: {
+    fontSize: 22,
+    color: "#999999",
+    marginLeft: 10,
+  },
+  contenedorGrid: {
     gap: 12,
   },
-
-  /* BOTÓN GRANDE - GALERÍA */
   botonGridGrande: {
-    width: "100%",
-    backgroundColor: "#F4F4F4",
-    paddingVertical: 18,
-    paddingHorizontal: 12,
-    borderRadius: 16,
+    backgroundColor: "#1A1A1A",
+    borderRadius: 18,
+    padding: 20,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    elevation: 1,
   },
-
-  /* BOTONES PEQUEÑOS */
   botonGrid: {
-    width: "48%",
-    backgroundColor: "#F4F4F4",
-    paddingVertical: 18,
-    paddingHorizontal: 12,
-    borderRadius: 16,
+    backgroundColor: "#F9F9F9",
+    borderRadius: 18,
+    padding: 16,
     alignItems: "center",
-    justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#E0E0E0",
-    elevation: 1,
+    borderColor: "#EEEEEE",
   },
-
   emojiGrid: {
-    fontSize: 24,
+    fontSize: 26,
     marginBottom: 6,
   },
-
   textoGrid: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "600",
-    color: "#222222",
-    textAlign: "center",
+    color: "#111111",
   },
-
+  botonCerrar: {
+    backgroundColor: "#8E3B46",
+    padding: 16,
+    borderRadius: 14,
+    alignItems: "center",
+    marginTop: 24,
+    elevation: 2,
+  },
+  textoCerrar: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontSize: 15,
+  },
   footer: {
     textAlign: "center",
-    color: "#888888",
+    color: "#999999",
     fontSize: 12,
-    marginTop: 24,
-    marginBottom: 12,
+    marginTop: 20,
+    marginBottom: 10,
   },
 });
